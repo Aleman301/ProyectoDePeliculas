@@ -6,7 +6,7 @@ import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from "../dtos/create-user.dto";
 import userService from "../services/user.service";
 import { UpdateUserDto } from "../dtos/update-user.dto";
-
+import { Usuarioss } from "../models/user";
 /*
 export const newUser = async (req: Request, res: Response) => {
 
@@ -42,7 +42,7 @@ export class UsersController {
         this.router.get('/user', this.createUser)
         this.router.get('/user', this.getUserList);
         this.router.get('/user/:id', this.getOneUser);
-        this.router.post('/user', this.createUser);
+        this.router.post('/userRegistrer', this.createUser);
         this.router.patch('/user/:id', this.update);
         this.router.delete('/user/:id', this.delete)
     }
@@ -74,7 +74,7 @@ export class UsersController {
             })
 
         }
-
+        
         const responseDto = await userService.createUser(createUserDto);
 
         return res.status(responseDto.code).json(

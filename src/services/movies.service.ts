@@ -37,7 +37,7 @@ class MoviesService{
         try {
             this.responseDto.data = await Movie.create(createMovieDto)
             this.responseDto.code = 201;
-            this.responseDto.message = 'Categoria creada satisfactoriamente';
+            this.responseDto.message = 'Pelicula creada satisfactoriamente';
             return this.responseDto;
         } catch (error) {
 

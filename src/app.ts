@@ -1,5 +1,6 @@
 import express, { json }  from 'express';
 import { MoviesController } from './Controllers/movies.controller';
+import {UsersController} from './Controllers/user.controller';
 import {conn} from './Database/connection';
 import { Usuarioss } from './models/user';
 import router from './routers/movies.routes';
@@ -7,13 +8,17 @@ import router from './routers/movies.routes';
 class App{
 
     public express : express.Application;
+    private port: string | 3001;
   
 
-    moviesController!: MoviesController;
+    moviesController: MoviesController;
+    userscontroller: UsersController;
+
 
     constructor(){
         this.express = express();
         this.db();
+        this.listen(3001);
         this.middlewares();
         this.controllers();
         this.db();
@@ -21,6 +26,7 @@ class App{
     }
     controllers(){
         this.moviesController = new MoviesController();
+        this.userscontroller=new UsersController();
     }
 
     middlewares(){
@@ -29,6 +35,7 @@ class App{
 
     routes(){
         this.express.use('/api', this.moviesController.router)
+        this.express.use('/api', this.userscontroller.router)
         this.express.use('api/user', router)
     }
     db(){
