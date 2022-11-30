@@ -1,20 +1,15 @@
 import {Sequelize} from 'sequelize-typescript';
+import * as dotenv from 'dotenv';
+//import { Movie } from '../models/movies';
 
-class Connection{
+    dotenv.config();
 
-    public connection: Sequelize;
 
-    constructor(){
-        this.connection = new Sequelize({
-            dialect: "postgres",
-            host:"localhost",
-            username: "postgres",
-            password: "1234",
-            database:"Peliculas",
-            //port:5432,
-            logging:false
-        });
-    }
-}
-
-export default Connection;
+export const conn : Sequelize = new Sequelize({
+    dialect: "postgres",
+    host: process.env.DB_HOST,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    logging: false
+})
