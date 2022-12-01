@@ -8,6 +8,7 @@ import { plainToClass } from 'class-transformer';
 import { UpdateMovieDto } from "../dtos/update-movie.dto";
 import { Movie } from "../models/movies";
 import { where } from "sequelize";
+import validateToken from "../routers/validate-token";
 
 
 export class MoviesController {
@@ -19,7 +20,7 @@ export class MoviesController {
      }
 
      initRoutes(){
-        this.router.get('/movies', this.getList);
+        this.router.get('/movies', validateToken,this.getList);
         this.router.get('/movies/:id', this.getOne);
         this.router.post('/movies', this.create);
         this.router.patch('/movies/:id', this.update);

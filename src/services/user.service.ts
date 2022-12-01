@@ -1,18 +1,35 @@
 import { ResponseDto } from '../common/dto/response.dto'
 import { Request, Response } from 'express';
 import { CreateUserDto } from '../dtos/create-user.dto';
-import { Usuarioss } from '../models/user';
+import { User } from '../models/user';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 
 class UserService{
 
     private responseDto: ResponseDto;
 
+    public async login(){
+        
+        this.responseDto = new ResponseDto();
+        try {
+            this.responseDto.data = await User.findAll({});
+            this.responseDto.code = 200;
+            this.responseDto.message = 'Usuario encontrado exitosamente'
+            return this.responseDto;
+        } catch (error) {
+            this.responseDto.code = 500;
+            this.responseDto.message = 'Usuario no registra';
+            console.log({error});
+            return this.responseDto;
+        }
+
+    }
+
     public async getUserList() {
         
         this.responseDto = new ResponseDto();
         try {
-            this.responseDto.data = await Usuarioss.findAll({});
+            this.responseDto.data = await User.findAll({});
             this.responseDto.code = 200;
             this.responseDto.message = 'Este es el listado de Usuario'
             return this.responseDto;
@@ -26,7 +43,7 @@ class UserService{
     }
 
     public async getOneUser( id: number ){
-        const user = await Usuarioss.findOne({ where : {id} })
+        const user = await User.findOne({ where : {id} })
         return user;
     }
 
@@ -35,7 +52,7 @@ class UserService{
         this.responseDto = new ResponseDto();
 
         try {
-            this.responseDto.data = await Usuarioss.create(createUserDto)
+            this.responseDto.data = await User.create(createUserDto)
             this.responseDto.code = 201;
             this.responseDto.message = 'Usuario creado satisfactoriamente';
             return this.responseDto;
@@ -69,7 +86,7 @@ class UserService{
             ...UpdateUserDto
         }
 
-        const updatepUser = await Usuarioss.update(updateUser, {where : {id}});
+        const updatepUser = await User.update(updateUser, {where : {id}});
 
         return this.getOneUser(id)
 
@@ -83,7 +100,7 @@ class UserService{
             return null;
         }
 
-        const deletedUser = await Usuarioss.destroy({ where: {id} });
+        const deletedUser = await User.destroy({ where: {id} });
 
         return true;
 

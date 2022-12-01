@@ -2,8 +2,9 @@ import express, { json }  from 'express';
 import { MoviesController } from './Controllers/movies.controller';
 import {UsersController} from './Controllers/user.controller';
 import {conn} from './Database/connection';
-import { Usuarioss } from './models/user';
+import { User } from './models/user';
 import router from './routers/movies.routes';
+import validateToken from './routers/validate-token';
 
 class App{
 
@@ -21,7 +22,6 @@ class App{
         this.listen(3001);
         this.middlewares();
         this.controllers();
-        this.db();
         this.routes();
     }
     controllers(){
@@ -34,7 +34,7 @@ class App{
     }
 
     routes(){
-        this.express.use('/api', this.moviesController.router)
+        this.express.use('/api' ,this.moviesController.router)
         this.express.use('/api', this.userscontroller.router)
         this.express.use('api/user', router)
     }
@@ -42,7 +42,7 @@ class App{
         conn
         .sync()
         .then(()=>{
-            Usuarioss.sync();
+            User.sync();
             console.log(`Database is Connected`)
         })
         .catch((err: any)=>{

@@ -16,22 +16,22 @@ export class CreateUserDto {
     @Length(3,50,{
         message: "El Nombre de Usuario debe tener entre 3 y 50 caracteres"
     })
-    acountname:string;
+    accountName:string;
 
     @Length(0, 100,{
         message: "El correo debe tener entre 5 y 20 caracteres"
     })
     correo: string;
     
-    @Length(1,8)
+    @Length(0,9)
     telefono:number;
 
-    @Length(3, 25,{
+    @Length(0, 250,{
         message: "La contraseña debe tener entre 3 y 20 caracteres"
     })
     contraseña: string;
 
-    @Length(3, 25)
+    @Length(3, 250)
     repetirContraseña: string;
 
 }

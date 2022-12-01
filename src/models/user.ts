@@ -6,27 +6,27 @@ export interface UserAddModel {
     id: number;
     nombre: string;
     apellido: string;
-    acountname:string;
+    accountName:string;
     correo:string;
     telefono: number;
     contraseña:string;
-    repetircontraseña:string;
+    repetirContraseña:string;
 }
 
 export interface UserModel extends Sequelize.Model<UserModel, UserAddModel> {
     id: number;
     nombre: string;
     apellido: string;
-    acountname:string;
+    accountName:string;
     correo:string;
     telefono: number;
     contraseña:string;
-    repetircontraseña:string;
+    repetirContraseña:string;
     createdAt: string;
     updatedAt: string;
 }
 
-export const Usuarioss = conn.define<UserModel, UserAddModel>('Usuarios', {
+export const User = conn.define<UserModel, UserAddModel>('Usuarios', {
     id: {
         type:Sequelize.DataType.INTEGER,
         primaryKey:true,
@@ -39,7 +39,7 @@ export const Usuarioss = conn.define<UserModel, UserAddModel>('Usuarios', {
     apellido: {
         type: Sequelize.DataType.STRING(20)
     }, 
-    acountname:{
+    accountName:{
         type:Sequelize.DataType.STRING(50)
     },
     correo:{
@@ -50,9 +50,9 @@ export const Usuarioss = conn.define<UserModel, UserAddModel>('Usuarios', {
         unique: true,
     },
     contraseña:{
-        type: Sequelize.DataType.STRING(25)
+        type: Sequelize.DataType.STRING(250)
     },
-    repetircontraseña:{
-        type:Sequelize.DataType.STRING(25)
+    repetirContraseña:{
+        type:Sequelize.DataType.STRING(250)
     }
 });
