@@ -13,9 +13,7 @@ export interface RolModel extends Sequelize.Model<RolModel, RolAddModel>{
     nombre: string
 }
 
-export const Rol = conn.define(
-    'roles',
-    {
+export const Rol = conn.define<RolModel, RolAddModel>('roles', {
         id: {
             type: Sequelize.DataType.INTEGER,
             primaryKey: true,
