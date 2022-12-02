@@ -3,6 +3,16 @@ import { Request, Response } from 'express';
 import { Movie } from '../models/movies';
 import { CreateMovieDto } from '../dtos/create-movies.dto';
 import { UpdateMovieDto } from '../dtos/update-movie.dto';
+import { decodeToken } from '../routers/validate-token';
+import { CreateValoracionDto } from '../dtos/create-valoracion.dto';
+import { validate } from 'class-validator';
+import userService from './user.service';
+
+interface CrearValoracion {
+    usuarioId: number,
+    movieId: number,
+    valoracion: number
+}
 
 class MoviesService{
 
@@ -88,8 +98,47 @@ class MoviesService{
         return true;
 
     }
+   
+    public buscarPorMovieName = async (movieName: string) => {
 
-    
+        const movie = await Movie.findOne({ where: { movieName } });
+
+        if (!movie) return null;
+        
+        return movie.dataValues.id;
+
+    };
+
+    public validarValoracion = async (valoracion: CreateValoracionDto): Promise<CrearValoracion | any> => {
+
+        const errors = await validate(valoracion);
+
+        if(errors.length > 0) {
+            
+            console.log(errors);
+
+            return errors;
+
+        }
+
+        const { accountName } = decodeToken;
+
+        const existeUsuario = await userService.buscarPorAccountName(accountName);
+        // console.log(existeUsuario);
+
+        if (!existeUsuario) return null;
+
+        const existePelicula = await this.buscarPorMovieName(valoracion.movieName);
+        
+        if (!existePelicula) return { code: 404, mensaje: 'No existe la pelicula.' };
+
+        return {
+            usuarioId: existeUsuario,
+            movieId: existePelicula,
+            valoracion: valoracion.valoracion
+        };
+
+    };   
 
 }
 

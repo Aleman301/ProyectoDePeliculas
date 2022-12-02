@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { User } from '../models/user';
 import { UpdateUserDto } from '../dtos/update-user.dto';
+import bcryp from 'bcrypt';
 
 class UserService{
 
@@ -52,6 +53,7 @@ class UserService{
         this.responseDto = new ResponseDto();
 
         try {
+            createUserDto.contraseña = await bcryp.hash(createUserDto.contraseña, 10);
             this.responseDto.data = await User.create(createUserDto)
             this.responseDto.code = 201;
             this.responseDto.message = 'Usuario creado satisfactoriamente';
@@ -106,7 +108,15 @@ class UserService{
 
     }
 
-  
+    public buscarPorAccountName = async (accountName: string) => {
+
+        const user = await User.findOne({ where: { accountName } });
+
+        if (!user) return null;
+        
+        return user.dataValues.id;
+
+    };
 
 }
 

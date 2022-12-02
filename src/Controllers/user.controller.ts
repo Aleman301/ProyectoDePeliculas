@@ -8,6 +8,7 @@ import userService from "../services/user.service";
 import { UpdateUserDto } from "../dtos/update-user.dto";
 import { User } from "../models/user";
 import jwt from 'jsonwebtoken';
+import 'dotenv/config';
 /*
 export const newUser = async (req: Request, res: Response) => {
 
@@ -31,23 +32,6 @@ export const login = (req: Request, res: Response) => {
 }
 */ 
 export class UsersController {
-
-    router = Router();
-
-    constructor(){
-        this.initRoutes();
-
-    }
-
-    initRoutes(){
-        this.router.post('/user', this.createUser)
-        this.router.get('/user', this.getUserList);
-        this.router.get('/user/:id', this.getOneUser);
-        this.router.post('/userRegistrer', this.createUser);
-        this.router.patch('/user/:id', this.update);
-        this.router.delete('/user/:id', this.delete)
-        this.router.post('/user/login', this.login)
-    }
 
     async login(req: Request, res: Response):Promise<Response> {
         const {accountName, contraseña} = req.body;
@@ -75,17 +59,16 @@ export class UsersController {
         const token = jwt.sign({
             accountName: accountName
         }, process.env.SECRET_KEY || 'Erlin99', {
-            expiresIn: '100000'
+            expiresIn: '10min'
         });
         
         
-        return res.json(token);
+        return res.json({
+            code: 200,
+            message: 'Inicio de sesion exitoso!',
+            token
+        });
         
-        //const responseDto = await userService.login();
-
-        //return res.status(responseDto.code).json(responseDto)
-
-       
     }
 
     async getUserList( req: Request, res: Response): Promise<Response> { 
@@ -101,45 +84,14 @@ export class UsersController {
 
     async createUser( req: Request, res: Response): Promise<Response> {
 
-        const { nombre, apellido, accountName, correo, telefono, contraseña, repetirContraseña } = req.body;
+        const payload = req.body;
 
-        //Validar si el usuario existe en la base de datos
-        const user = await User.findOne( {where: { accountName: accountName }} )
+        console.log(payload.accountName);
 
-        if(user){
-            return  res.status(400).json({
-                    msg: `El usuario ${accountName} ya existe`
-                })
-        }
+        // const hashedPassword = await bcryp.hash(contraseña, 10);
+        // console.log(hashedPassword);
 
-        const hashedPassword = await bcryp.hash(contraseña, 10);
-        console.log(hashedPassword);
-
-        try {
-            //Guarda usuario en la base de datos
-            await   User.create({
-                nombre: nombre, 
-                apellido: apellido, 
-                accountName: accountName, 
-                correo: correo, 
-                telefono: telefono ,
-                contraseña: hashedPassword, 
-                repetirContraseña: repetirContraseña
-        })
-
-        res.json({
-            msg: `Usuario ${accountName} creado exitosamente`
-        })
-        } catch (error) {
-            res.status(400).json({
-                msg:'Ocurrio un error',
-                error
-            })
-        }
-
-        
-
-        let createUserDto = plainToClass(CreateUserDto, { nombre, apellido, accountName, correo, telefono, contraseña, repetirContraseña });
+        let createUserDto = plainToClass(CreateUserDto, payload);
 
         const errors = await validate(createUserDto);
 
@@ -151,12 +103,74 @@ export class UsersController {
             })
 
         }
+
+        //Validar si el usuario existe en la base de datos
+        const user = await User.findOne( {where: { accountName: createUserDto.accountName }} );
+
+        if(user){
+            return  res.status(400).json({
+                    msg: `El usuario ${createUserDto.accountName} ya existe`
+                })
+        }        
         
+        //Validar si el usuario existe en la base de datos
+        const correo = await User.findOne( {where: { correo: createUserDto.correo }} );
+
+        if(correo){
+            return  res.status(400).json({
+                    msg: `El correo ${createUserDto.correo} ya existe`
+                })
+        }      
+        
+        if(createUserDto.contraseña !== createUserDto.repetirContraseña){
+            return  res.status(400).json({
+                    msg: `Las contraseñas no coinciden`
+                })
+        }     
+
         const responseDto = await userService.createUser(createUserDto);
 
-        return res.status(responseDto.code).json(
-            responseDto
-        )
+        
+        /*
+        let info = {
+            mensaje: '',
+            paginas: []
+        };
+        let rol = 1;
+
+            // suponiendo que el rolId '1' sea igual critico
+        if (rol === 1) {
+
+            info = {
+                mensaje: 'Usted tiene acceso a las siguientes paginas.',
+                paginas: [
+                    'Ver todas las peliculas',
+                    'Tiene acceso a comentar',
+                    'Tiene acceso a ver todos su comentarios',
+                    'Tiene acceso a eliminar sus comentarios'
+                ]
+            }
+
+        }
+
+        const response = {
+            responseDto,
+            info
+        }
+
+        return (info.mensaje === '') 
+            ?   res.status(responseDto.code).json(
+                    responseDto,  
+                );
+            :   res.status(responseDto.code).json(
+                    response
+                );
+        */
+
+        // const existeUsuario = await userService.buscarPorEmail(createUserDto.correo);
+        // console.log(existeUsuario);
+
+        return res.status(responseDto.code).json(responseDto);
 
     }
 
@@ -180,7 +194,7 @@ export class UsersController {
 
         console.log(user)
 
-        return res.json(user) ;
+        return res.json(user);
     }
 
     async delete( req: Request, res: Response): Promise<Response> { 
@@ -192,3 +206,5 @@ export class UsersController {
     }
 
 }
+
+export default new UsersController();

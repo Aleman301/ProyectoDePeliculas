@@ -1,4 +1,4 @@
-import { Length, IsNotEmpty, IsOptional, length } from "class-validator";
+import { Length, IsNotEmpty, IsOptional, IsEmail } from "class-validator";
 
 
 export class CreateUserDto {
@@ -11,27 +11,34 @@ export class CreateUserDto {
     @Length(3, 20,{
         message: "El apellido debe tener entre 3 y 20 caracteres"
     })
+    @IsNotEmpty()    
     apellido: string;
 
     @Length(3,50,{
         message: "El Nombre de Usuario debe tener entre 3 y 50 caracteres"
     })
+    @IsNotEmpty()
     accountName:string;
 
     @Length(0, 100,{
         message: "El correo debe tener entre 5 y 20 caracteres"
     })
+    @IsNotEmpty()
+    @IsEmail() 
     correo: string;
     
-    @Length(0,9)
+    @Length(8,8)
+    @IsNotEmpty()    
     telefono:number;
 
     @Length(0, 250,{
         message: "La contraseña debe tener entre 3 y 20 caracteres"
     })
+    @IsNotEmpty()    
     contraseña: string;
 
     @Length(3, 250)
+    @IsNotEmpty()    
     repetirContraseña: string;
 
 }

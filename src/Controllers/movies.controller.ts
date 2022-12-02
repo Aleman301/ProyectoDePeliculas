@@ -8,24 +8,11 @@ import { plainToClass } from 'class-transformer';
 import { UpdateMovieDto } from "../dtos/update-movie.dto";
 import { Movie } from "../models/movies";
 import { where } from "sequelize";
-import validateToken from "../routers/validate-token";
+import { CreateValoracionDto } from "../dtos/create-valoracion.dto";
+import { ResponseDto } from "../common/dto/response.dto";
 
 
 export class MoviesController {
-
-     router = Router();
-
-     constructor(){
-        this.initRoutes();
-     }
-
-     initRoutes(){
-        this.router.get('/movies', validateToken,this.getList);
-        this.router.get('/movies/:id', this.getOne);
-        this.router.post('/movies', this.create);
-        this.router.patch('/movies/:id', this.update);
-        this.router.delete('/movies/:id', this.delete)
-     }
 
      async getList( req: Request, res: Response): Promise<Response> { 
         const responseDto = await moviesService.getList();
@@ -93,10 +80,24 @@ export class MoviesController {
         return res.status(200).json();
     }
 
+    async valoracion( req: Request, res: Response): Promise<Response> { 
+        
+        const payload = req.body;
+
+        let createValoracionDto = plainToClass(CreateValoracionDto, payload);
+        const valoracionValidada = await moviesService.validarValoracion(createValoracionDto);
+
+        if (!valoracionValidada) return res.status(400).json(valoracionValidada);
+
+        return res.status(200).json(
+            valoracionValidada
+        ) ;
+    }            
+
+
 }
 
-
-
+export default new MoviesController();
 
 
 

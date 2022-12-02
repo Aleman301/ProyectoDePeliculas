@@ -1,6 +1,7 @@
 
 import * as Sequelize from 'sequelize-typescript'
 import { conn} from "../Database/connection"
+import { Valoracion } from './valoracion';
 
 export interface MovieAddModel {
     id: number;
@@ -46,10 +47,15 @@ export const Movie = conn.define<MovieModel, MovieAddModel>('movies', {
     }
 })
 
+Movie.hasMany(Valoracion, {
+    foreignKey: 'movieId',
+    sourceKey: 'id'
+});
 
-
-
-
+Valoracion.belongsTo(Movie, {
+    foreignKey: 'movieId',
+    targetKey: 'id'
+});
 
 
 
