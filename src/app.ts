@@ -1,14 +1,21 @@
 import express, { json }  from 'express';
-import { MoviesController } from './Controllers/movies.controller';
-import {UsersController} from './Controllers/user.controller';
-import {conn} from './Database/connection';
+import { MoviesController } from './controllers/movies.controller';
+import {UsersController} from './controllers/user.controller';
+import {conn} from './database/connection';
+import { Comentario } from './models/comentarios';
+import { Genero } from './models/generos';
+import { Pelicula } from './models/peliculas';
+import { PeliculaGenero } from './models/peliculas_generos';
 import { Rol } from './models/roles';
-import { User } from './models/user';
-import { Valoracion } from './models/valoracion';
+import { User } from './models/usuarios';
+import { ValoracionComentario } from './models/valoraciones_comentarios';
 import moviesRoutes from './routers/movies.routes';
 import router from './routers/movies.routes';
+import rolRoutes from './routers/rol.routes';
 import userRoutes from './routers/user.routes';
 import validateToken from './routers/validate-token';
+import generosService from './services/generos.service';
+import rolService from './services/rol.service';
 
 class App{
 
@@ -34,8 +41,10 @@ class App{
     }
 
     routes(){
-        this.express.use('/api', moviesRoutes.router)
-        this.express.use('/api', userRoutes.router)
+        this.express.use('/api', moviesRoutes.router);
+        this.express.use('/api', userRoutes.router);
+        this.express.use('/api', rolRoutes.router)
+
         // this.express.use('api/user', router)
     }
     db(){
@@ -45,9 +54,16 @@ class App{
 
             Rol.sync();
             User.sync();
-            Valoracion.sync();
-            
+            Genero.sync();
+            Pelicula.sync();
+            Comentario.sync();
+            ValoracionComentario.sync();
+            PeliculaGenero.sync();
+
             console.log(`Database is Connected`);
+
+            rolService.createdRoles();
+            generosService.createdGeneros();
 
         })
         .catch((err: any)=>{

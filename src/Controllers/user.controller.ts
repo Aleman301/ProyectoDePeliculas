@@ -1,23 +1,22 @@
 import { Request, Response, Router } from "express"
-import bcryp from 'bcrypt';
+import bcrypt from 'bcrypt';
 //import { User } from "../models/user";
 import { validate } from "class-validator";
 import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from "../dtos/create-user.dto";
 import userService from "../services/user.service";
 import { UpdateUserDto } from "../dtos/update-user.dto";
-import { User } from "../models/user";
+import { User } from "../models/usuarios";
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import rolService from "../services/rol.service";
 /*
 export const newUser = async (req: Request, res: Response) => {
 
     const { username, password } = req.body;
 
-    const hashedPassword = await bcryp.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     
-    
-
 }
 
 export const login = (req: Request, res: Response) => {
@@ -25,7 +24,7 @@ export const login = (req: Request, res: Response) => {
     const { body } =req;
 
     res.json({
-        msg: 'Login User',
+        message: 'Login User',
         body
     })
 
@@ -37,31 +36,30 @@ export class UsersController {
         const {accountName, contraseña} = req.body;
 
         //Validar si el usuario existe en la base de datos
-        const user = await User.findOne({ where: { accountName: accountName } })
+        const user = await User.findOne({ where: { accountName: accountName } }).then(data => data?.toJSON());
 
         if(!user){
             return res.status(400).json({
-                msg: `No existe un usuario con el nombre ${accountName} en la base de datos`
+                message: `No existe un usuario con el nombre ${accountName} en la base de datos`
             })
         }
         
         //Validar contraseña
-        
-        const contraseñaValidad = await bcryp.compare(contraseña, user.contraseña)
+        const contraseñaValidad = await bcrypt.compare(contraseña, user.contraseña);
 
         if(!contraseñaValidad) {
             return res.status(400).json({
-                msg:'Password Incorrecto'
+                message:'Password Incorrecto'
             })
         }
         
         //Generar Token
         const token = jwt.sign({
-            accountName: accountName
+            accountName: accountName,
+            rol: await rolService.getUserRol(accountName)
         }, process.env.SECRET_KEY || 'Erlin99', {
             expiresIn: '10min'
         });
-        
         
         return res.json({
             code: 200,
@@ -88,7 +86,7 @@ export class UsersController {
 
         console.log(payload.accountName);
 
-        // const hashedPassword = await bcryp.hash(contraseña, 10);
+        // const hashedPassword = await bcrypt.hash(contraseña, 10);
         // console.log(hashedPassword);
 
         let createUserDto = plainToClass(CreateUserDto, payload);
@@ -98,9 +96,9 @@ export class UsersController {
         if(errors.length > 0) {
             console.log(errors);
 
-            return res.status(400).json({
-                "Validation-errors" : errors
-            })
+            return  res.status(400).json({
+                        "Validation-errors" : errors
+                    });
 
         }
 
@@ -109,8 +107,8 @@ export class UsersController {
 
         if(user){
             return  res.status(400).json({
-                    msg: `El usuario ${createUserDto.accountName} ya existe`
-                })
+                        message: `El usuario ${createUserDto.accountName} ya existe`
+                    });
         }        
         
         //Validar si el usuario existe en la base de datos
@@ -118,15 +116,15 @@ export class UsersController {
 
         if(correo){
             return  res.status(400).json({
-                    msg: `El correo ${createUserDto.correo} ya existe`
+                    message: `El correo ${createUserDto.correo} ya existe`
                 })
         }      
         
         if(createUserDto.contraseña !== createUserDto.repetirContraseña){
             return  res.status(400).json({
-                    msg: `Las contraseñas no coinciden`
-                })
-        }     
+                        message: `Las contraseñas no coinciden`
+                    });
+        } 
 
         const responseDto = await userService.createUser(createUserDto);
 

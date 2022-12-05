@@ -1,5 +1,5 @@
-import { Length, IsNotEmpty, IsOptional, IsEmail } from "class-validator";
-
+import { Length, IsNotEmpty, IsOptional, IsEmail, IsNumber } from "class-validator";
+import { Is } from "sequelize-typescript";
 
 export class CreateUserDto {
     @Length(3,20, {
@@ -40,5 +40,9 @@ export class CreateUserDto {
     @Length(3, 250)
     @IsNotEmpty()    
     repetirContraseña: string;
+
+    @IsNumber()
+    @IsNotEmpty()    
+    rolId: string;
 
 }

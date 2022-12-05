@@ -1,6 +1,6 @@
 import * as Sequelize from 'sequelize-typescript'
-import { conn} from "../Database/connection"
-import { Valoracion } from './valoracion';
+import { conn} from "../database/connection"
+import { ValoracionComentario } from './valoraciones_comentarios';
 
 
 export interface UserAddModel {
@@ -25,7 +25,7 @@ export interface UserModel extends Sequelize.Model<UserModel, UserAddModel> {
     updatedAt: string;
 }
 
-export const User = conn.define<UserModel, UserAddModel>('usuarios', {
+export const User = conn.define ('usuarios', {
     id: {
         type:Sequelize.DataType.INTEGER,
         primaryKey:true,
@@ -54,12 +54,12 @@ export const User = conn.define<UserModel, UserAddModel>('usuarios', {
     }
 });
 
-User.hasMany(Valoracion, {
+User.hasMany(ValoracionComentario, {
     foreignKey: 'usuarioId',
     sourceKey: 'id'
 });
 
-Valoracion.belongsTo(User, {
-    foreignKey: 'movieId',
+ValoracionComentario.belongsTo(User, {
+    foreignKey: 'usuarioId',
     targetKey: 'id'
 });

@@ -1,5 +1,6 @@
 import { Router } from "express";
-import usersController from "../Controllers/user.controller";
+import usersController from "../controllers/user.controller";
+import validateToken from "./validate-token";
 
 class UsersRoutes {
     
@@ -11,13 +12,13 @@ class UsersRoutes {
     }
 
     initRoutes(){
-        this.router.post('/user', usersController.createUser)
-        this.router.get('/user', usersController.getUserList);
-        this.router.get('/user/:id', usersController.getOneUser);
+        this.router.post('/user', usersController.createUser);
+        this.router.get('/user', validateToken, usersController.getUserList);
+        this.router.get('/user/:id', validateToken, usersController.getOneUser);
         this.router.post('/userRegister', usersController.createUser);
-        this.router.patch('/user/:id', usersController.update);
-        this.router.delete('/user/:id', usersController.delete)
-        this.router.post('/user/login', usersController.login)
+        this.router.patch('/user/:id', validateToken, usersController.update);
+        this.router.delete('/user/:id', validateToken, usersController.delete);
+        this.router.post('/user/login', usersController.login);
     }
 
 } 

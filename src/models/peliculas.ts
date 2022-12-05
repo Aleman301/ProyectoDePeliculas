@@ -1,43 +1,44 @@
 
 import * as Sequelize from 'sequelize-typescript'
-import { conn} from "../Database/connection"
-import { Valoracion } from './valoracion';
+import { conn} from "../database/connection"
+import { PeliculaGenero } from './peliculas_generos';
+import { ValoracionComentario } from './valoraciones_comentarios';
 
-export interface MovieAddModel {
+export interface PeliculaAddModel {
     id: number;
-    movieName:string;
+    nombre:string;
     añoDeLanzamiento:string;
-    valoraciones:string;
+    valoraciones_promedio:string;
     precio:string
     disponibilidad:string;
 }
 
-export interface MovieModel extends Sequelize.Model<MovieModel, MovieAddModel>{
+export interface PeliculaModel extends Sequelize.Model<PeliculaModel, PeliculaAddModel>{
     id: number;
-    movieName:string;
+    nombre:string;
     añoDeLanzamiento:string;
-    valoraciones:string;
+    valoraciones_promedio:string;
     precio:string
     disponibilidad:string;
     createdAt: Date;
     updateAt: Date; 
 }
 
-export const Movie = conn.define<MovieModel, MovieAddModel>('movies', {
+export const Pelicula = conn.define<PeliculaModel, PeliculaAddModel>('peliculas', {
     id: {
         type: Sequelize.DataType.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    movieName: {
+    nombre: {
         type: Sequelize.DataType.STRING(250),
         unique: true,
     },
     añoDeLanzamiento: {
         type: Sequelize.DataType.STRING(250)
     },
-    valoraciones: {
-        type: Sequelize.DataType.STRING(250)
+    valoraciones_promedio: {
+        type: Sequelize.DataType.INTEGER
     },
     precio: {
         type: Sequelize.DataType.STRING(250)
@@ -47,23 +48,32 @@ export const Movie = conn.define<MovieModel, MovieAddModel>('movies', {
     }
 })
 
-Movie.hasMany(Valoracion, {
-    foreignKey: 'movieId',
+Pelicula.hasMany(ValoracionComentario, {
+    foreignKey: 'peliculaId',
     sourceKey: 'id'
 });
 
-Valoracion.belongsTo(Movie, {
-    foreignKey: 'movieId',
+ValoracionComentario.belongsTo(Pelicula, {
+    foreignKey: 'peliculaId',
+    targetKey: 'id'
+});
+
+Pelicula.hasMany(PeliculaGenero, {
+    foreignKey: 'peliculaId',
+    sourceKey: 'id'
+});
+
+PeliculaGenero.belongsTo(Pelicula, {
+    foreignKey: 'peliculaId',
     targetKey: 'id'
 });
 
 
-
 /** 
 @Table({
-    tableName: 'movies'
+    tableName: 'peliculas'
 })
-export class Movie extends Model{
+export class Pelicula extends Model{
 
     @Column({
         type: DataType.INTEGER,
@@ -77,7 +87,7 @@ export class Movie extends Model{
         allowNull: false,
         unique: true,
     })
-    public movieName: string;
+    public peliculaName: string;
 
     @Column({
         type: DataType.STRING,

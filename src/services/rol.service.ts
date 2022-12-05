@@ -2,12 +2,21 @@ import { ResponseDto } from "../common/dto/response.dto";
 import { CreateRolDto } from "../dtos/create-rol.dto";
 import { UpdateRolDto } from "../dtos/update-rol.dto";
 import { Rol } from "../models/roles";
-import { User } from "../models/user";
+import { User } from "../models/usuarios";
 
 
 class rolService{
 
     private responseDto: ResponseDto;
+
+    private roles = [
+        {
+            nombre: 'admin'
+        },
+        {
+            nombre: 'critico'
+        }
+    ];
 
     public async getRolList() {
 
@@ -29,6 +38,14 @@ class rolService{
     public async getOneRol( id:number ) {
         const rol = await Rol.findOne({ where : {id} })
         return rol;
+    }
+
+    public async getUserRol (accountName: string) {
+
+        const userRol = await User.findOne({ where: { accountName }, include: [{ model: Rol }] }).then(data => data?.toJSON());
+
+        return userRol.role.nombre;
+
     }
 
     public async createRol ( createRolDto : CreateRolDto ) {
@@ -87,6 +104,19 @@ class rolService{
 
     }
 
+    public async createdRoles () {
+
+        const rolesCount = await Rol.findAndCountAll();
+
+        if (rolesCount.count === 0) {
+
+            this.roles.map(async (rol) => {
+                await Rol.create(rol);
+            });
+
+        }
+
+    }
 
 }
 

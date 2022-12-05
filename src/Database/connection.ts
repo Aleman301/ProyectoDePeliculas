@@ -1,9 +1,8 @@
 import {Sequelize} from 'sequelize-typescript';
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 //import { Movie } from '../models/movies';
 
-    dotenv.config();
-
+// dotenv.config();
 
 export const conn : Sequelize = new Sequelize({
     dialect: "postgres",

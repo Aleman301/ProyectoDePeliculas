@@ -1,7 +1,8 @@
 
 import { IsNumber, IsNotEmpty, Length, IsOptional, IsString } from 'class-validator';
+import { Is } from 'sequelize-typescript';
 
-export class CreateValoracionDto {
+export class CreateValoracionComentarioDto {
 
     @IsNumber()
     @IsNotEmpty()
@@ -10,10 +11,15 @@ export class CreateValoracionDto {
 
     @IsString()
     @IsNotEmpty()
-    public movieName: string;
+    public nombre: string;
 
     @IsNumber()
     @IsNotEmpty()
     public valoracion: number;
+
+    @IsString()
+    @Length(10, 250)
+    @IsNotEmpty()
+    public comentario: string;
 
 }

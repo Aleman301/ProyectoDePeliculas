@@ -1,9 +1,10 @@
 import { ResponseDto } from '../common/dto/response.dto'
 import { Request, Response } from 'express';
 import { CreateUserDto } from '../dtos/create-user.dto';
-import { User } from '../models/user';
+import { User } from '../models/usuarios';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import bcryp from 'bcrypt';
+import rolService from './rol.service';
 
 class UserService{
 
@@ -13,15 +14,22 @@ class UserService{
         
         this.responseDto = new ResponseDto();
         try {
+
             this.responseDto.data = await User.findAll({});
             this.responseDto.code = 200;
-            this.responseDto.message = 'Usuario encontrado exitosamente'
+            this.responseDto.message = 'Usuario encontrado exitosamente';
+
             return this.responseDto;
+
         } catch (error) {
+
             this.responseDto.code = 500;
             this.responseDto.message = 'Usuario no registra';
+
             console.log({error});
+
             return this.responseDto;
+
         }
 
     }
@@ -53,21 +61,34 @@ class UserService{
         this.responseDto = new ResponseDto();
 
         try {
+            
             createUserDto.contraseña = await bcryp.hash(createUserDto.contraseña, 10);
-            this.responseDto.data = await User.create(createUserDto)
+            
             this.responseDto.code = 201;
             this.responseDto.message = 'Usuario creado satisfactoriamente';
+            this.responseDto.data = await User.create({
+                ...createUserDto
+            });
+
             return this.responseDto;
+        
         } catch (error) {
 
             if(error.parent.code == "23505"){
+                
                 this.responseDto.code = 400;
                 this.responseDto.message = 'Error al registrar el usuario, no se puede ingresar una usuario nuevamente';
+                
                 return this.responseDto;
+            
             }
 
             this.responseDto.code = 500;
             this.responseDto.message = 'Error al registrar Usuario';
+
+            if (!(await rolService.getOneRol(+createUserDto.rolId))) {
+                this.responseDto.message = 'El rol que esta tratando de ingresar no existe!';
+            }
             
             return this.responseDto;
         }
@@ -75,7 +96,7 @@ class UserService{
     }
 
 
-     public async updateUser ( UpdateUserDto : UpdateUserDto, id: number ) {
+    public async updateUser ( UpdateUserDto : UpdateUserDto, id: number ) {
 
         const user = await this.getOneUser(id);
 

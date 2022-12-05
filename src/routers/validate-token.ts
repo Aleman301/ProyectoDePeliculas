@@ -6,6 +6,7 @@ export let decodeToken: InterfaceJWTPayload;
 
 interface InterfaceJWTPayload {
     accountName: string,
+    rol: string,
     iat: number,
     exp: number
 }
@@ -20,7 +21,7 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
             
             const match = (headerToken.match(/(Bearer )?/) && headerToken.match(/(Bearer)?/)[1] !== undefined) ? true : false;
             const bearerToken = (match) ? headerToken.slice(7) : headerToken;
-            console.log(bearerToken);
+
             const infoToken = jwt.verify(bearerToken, process.env.SECRET_KEY || 'Erlin99');
 
             decodeToken = infoToken as InterfaceJWTPayload;

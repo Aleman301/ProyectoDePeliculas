@@ -1,10 +1,7 @@
 import rolService from "../services/rol.service";
 import { Request, Response, Router } from "express"
-import bcryp from 'bcrypt';
-//import { User } from "../models/user";
 import { validate } from "class-validator";
 import { plainToClass } from 'class-transformer';
-import { User } from "../models/user";
 import 'dotenv/config';
 import { CreateRolDto } from "../dtos/create-rol.dto";
 import { UpdateRolDto } from "../dtos/update-rol.dto";
@@ -30,13 +27,13 @@ export class RolController {
         const errors = await validate(createRolDto);
 
         if(errors.length > 0){
+            
             console.log(errors);
         
-
-        return res.status(400).json({
-            "Validation-errors" : errors
-        })
-    }
+            return  res.status(400).json({
+                        "Validation-errors" : errors
+                    });
+        }
 
         const responseDto = await rolService.createRol(createRolDto);
 

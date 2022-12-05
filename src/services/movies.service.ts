@@ -1,12 +1,13 @@
 import { ResponseDto } from '../common/dto/response.dto'
-import { Request, Response } from 'express';
-import { Movie } from '../models/movies';
+import { Pelicula } from '../models/peliculas';
 import { CreateMovieDto } from '../dtos/create-movies.dto';
 import { UpdateMovieDto } from '../dtos/update-movie.dto';
 import { decodeToken } from '../routers/validate-token';
-import { CreateValoracionDto } from '../dtos/create-valoracion.dto';
+import { CreateValoracionComentarioDto } from '../dtos/create-valoracion_comentario.dto';
 import { validate } from 'class-validator';
 import userService from './user.service';
+import utilidades from '../common/utilidades/utilidades';
+import { Comentario } from '../models/comentarios';
 
 interface CrearValoracion {
     usuarioId: number,
@@ -14,7 +15,7 @@ interface CrearValoracion {
     valoracion: number
 }
 
-class MoviesService{
+class PeliculasService{
 
     private responseDto: ResponseDto;
 
@@ -22,7 +23,7 @@ class MoviesService{
         
         this.responseDto = new ResponseDto();
         try {
-            this.responseDto.data = await Movie.findAll({});
+            this.responseDto.data = await Pelicula.findAll({});
             this.responseDto.code = 200;
             this.responseDto.message = 'Este es el listado de Peliculas'
             return this.responseDto;
@@ -36,7 +37,7 @@ class MoviesService{
     }
 
     public async getOne( id: number ){
-        const category = await Movie.findOne({ where : {id} })
+        const category = await Pelicula.findOne({ where : {id} })
         return category;
     }
 
@@ -45,16 +46,24 @@ class MoviesService{
         this.responseDto = new ResponseDto();
 
         try {
-            this.responseDto.data = await Movie.create(createMovieDto)
+
+            createMovieDto.nombre = utilidades.formateoDePalabras(createMovieDto.nombre);
+            
             this.responseDto.code = 201;
             this.responseDto.message = 'Pelicula creada satisfactoriamente';
+            this.responseDto.data = await Pelicula.create(createMovieDto)
+
             return this.responseDto;
+        
         } catch (error) {
 
             if(error.parent.code == "23505"){
+                
                 this.responseDto.code = 400;
-                this.responseDto.message = 'Error al registrar la pelicula, no se puede ingresar una pelicula nuevamente';
+                this.responseDto.message = 'Error al registrar la pelicula, ya existe una pelicula con ese nombre.';
+                
                 return this.responseDto;
+            
             }
 
             this.responseDto.code = 500;
@@ -66,7 +75,7 @@ class MoviesService{
     }
 
 
-    public async update( UpdateMovieDto : UpdateMovieDto, id: number ) {
+    public async update( updateMovieDto : UpdateMovieDto, id: number ) {
 
         const movie = await this.getOne(id);
 
@@ -74,12 +83,12 @@ class MoviesService{
             return null;
         }
 
-        const updateMovie = {
+        const updatePelicula = {
             id,
-            ...UpdateMovieDto
+            ...updateMovieDto
         }
 
-        const updatepMovie = await Movie.update(updateMovie, {where : {id}});
+        const updatepPelicula = await Pelicula.update(updatePelicula, {where : {id}});
 
         return this.getOne(id)
 
@@ -93,15 +102,15 @@ class MoviesService{
             return null;
         }
 
-        const deletedMovie = await Movie.destroy({ where: {id} });
+        const deletedPelicula = await Pelicula.destroy({ where: {id} });
 
         return true;
 
     }
    
-    public buscarPorMovieName = async (movieName: string) => {
+    public buscarPorPeliculaName = async (nombre: string) => {
 
-        const movie = await Movie.findOne({ where: { movieName } });
+        const movie = await Pelicula.findOne({ where: { nombre } });
 
         if (!movie) return null;
         
@@ -109,15 +118,17 @@ class MoviesService{
 
     };
 
-    public validarValoracion = async (valoracion: CreateValoracionDto): Promise<CrearValoracion | any> => {
+    public validarValoracion = async (valoracion: CreateValoracionComentarioDto): Promise<CrearValoracion | any> => {
 
         const errors = await validate(valoracion);
 
         if(errors.length > 0) {
             
-            console.log(errors);
-
-            return errors;
+            return {
+                code: 400,
+                message: 'Errors',
+                data: errors
+            };
 
         }
 
@@ -128,20 +139,30 @@ class MoviesService{
 
         if (!existeUsuario) return null;
 
-        const existePelicula = await this.buscarPorMovieName(valoracion.movieName);
+        valoracion.nombre = utilidades.formateoDePalabras(valoracion.nombre);
+
+        const existePelicula = await this.buscarPorPeliculaName(valoracion.nombre);
         
-        if (!existePelicula) return { code: 404, mensaje: 'No existe la pelicula.' };
+        if (!existePelicula) 
+            return { code: 404, mensaje: 'No existe la pelicula.' };
+
+        if (valoracion.valoracion > 5 || valoracion.valoracion <= 0) 
+            return { code: 400, mensaje: 'Solo puede valorar entre 1 y 5, 1 lo minimo y 5 en lo maximo.' };
+
+        const comentarioNuevo = await Comentario.create({ comentario: valoracion.comentario });
 
         return {
-            usuarioId: existeUsuario,
-            movieId: existePelicula,
-            valoracion: valoracion.valoracion
+            code: 201,
+            data: {
+                usuarioId: existeUsuario,
+                peliculaId: existePelicula,
+                valoracion: valoracion.valoracion,
+                comentarioId: comentarioNuevo.dataValues.id
+            }
         };
 
     };   
 
 }
 
-    
-
-export default new MoviesService();
+export default new PeliculasService();

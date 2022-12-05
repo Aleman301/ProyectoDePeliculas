@@ -1,7 +1,7 @@
 
 import * as Sequelize from 'sequelize-typescript';
-import { conn } from '../Database/connection';
-import { User } from './user';
+import { conn } from '../database/connection';
+import { User } from './usuarios';
 
 export interface RolAddModel {
     id: number,

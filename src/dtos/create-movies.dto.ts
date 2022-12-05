@@ -1,12 +1,11 @@
-import { Length, IsNotEmpty, IsOptional } from "class-validator";
-
+import { Length, IsNotEmpty, IsOptional, IsArray } from "class-validator";
 
 export class CreateMovieDto {
     @Length(3,50, {
         message: "El nombre debe tener entre 3 y 50 caracteres"
     })
     @IsNotEmpty()
-    movieName: string;
+    nombre: string;
 
     @Length(0, 250)
     @IsOptional()
@@ -23,5 +22,9 @@ export class CreateMovieDto {
     @Length(0, 250)
     @IsOptional()
     disponibilidad: string
+
+    @IsArray()
+    @IsNotEmpty()
+    generos: string[]
 
 }
