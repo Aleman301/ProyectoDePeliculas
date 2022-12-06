@@ -19,6 +19,9 @@ class UsersRoutes {
         this.router.patch('/user/:id', validateToken, usersController.update);
         this.router.delete('/user/:id', validateToken, usersController.delete);
         this.router.post('/user/login', usersController.login);
+
+        this.router.post('/user/cambiarContra', usersController.cambiarContraseña);
+
     }
 
 } 

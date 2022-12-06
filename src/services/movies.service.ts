@@ -8,6 +8,9 @@ import { validate } from 'class-validator';
 import userService from './user.service';
 import utilidades from '../common/utilidades/utilidades';
 import { Comentario } from '../models/comentarios';
+import { Genero } from '../models/generos';
+import { PeliculaGenero } from '../models/peliculas_generos';
+import { ValoracionComentario } from '../models/valoraciones_comentarios';
 
 interface CrearValoracion {
     usuarioId: number,
@@ -23,9 +26,9 @@ class PeliculasService{
         
         this.responseDto = new ResponseDto();
         try {
-            this.responseDto.data = await Pelicula.findAll({});
             this.responseDto.code = 200;
             this.responseDto.message = 'Este es el listado de Peliculas'
+            this.responseDto.data = await Pelicula.findAll({});
             return this.responseDto;
         } catch (error) {
             this.responseDto.code = 500;
@@ -37,8 +40,16 @@ class PeliculasService{
     }
 
     public async getOne( id: number ){
-        const category = await Pelicula.findOne({ where : {id} })
+        const category = await Pelicula.findOne({ where : {id} });
         return category;
+    }
+
+    public async getPeliculasPorGenero (nombre: string) {
+
+        const peliculas = await Genero.findAll({ where: { nombre }, include: [{ model: PeliculaGenero, include: [{ model: Pelicula }] }] });
+
+        return peliculas;
+
     }
 
     public async create ( createMovieDto : CreateMovieDto ) {

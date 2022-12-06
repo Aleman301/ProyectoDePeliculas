@@ -10,6 +10,8 @@ import { User } from "../models/usuarios";
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import rolService from "../services/rol.service";
+import utilidades from "../common/utilidades/utilidades";
+import { UpdatePasswordDto } from "../dtos/update-password.dto";
 /*
 export const newUser = async (req: Request, res: Response) => {
 
@@ -33,7 +35,9 @@ export const login = (req: Request, res: Response) => {
 export class UsersController {
 
     async login(req: Request, res: Response):Promise<Response> {
-        const {accountName, contraseña} = req.body;
+        let {accountName, contraseña} = req.body;
+
+        accountName = utilidades.formateoDePalabras(accountName);
 
         //Validar si el usuario existe en la base de datos
         const user = await User.findOne({ where: { accountName: accountName } }).then(data => data?.toJSON());
@@ -69,6 +73,58 @@ export class UsersController {
         
     }
 
+    async cambiarContraseña (req: Request, res: Response) {
+
+        const payload = req.body;
+
+        // console.log(payload.accountName);
+
+        // const hashedPassword = await bcrypt.hash(contraseña, 10);
+        // console.log(hashedPassword);
+
+        let updatePasswordDto = plainToClass(UpdatePasswordDto, payload);
+
+        const errors = await validate(updatePasswordDto);
+
+        if(errors.length > 0) {
+            console.log(errors);
+
+            return  res.status(400).json({
+                        "Validation-errors" : errors
+                    });
+
+        }
+
+        updatePasswordDto.accountName = utilidades.formateoDePalabras(updatePasswordDto.accountName);
+
+        if(updatePasswordDto.contraseña === updatePasswordDto.nuevaContraseña){
+            return  res.status(400).json({
+                        message: `Las contraseñas coinciden`
+                    });
+        }
+
+        const user = await User.findOne({ where: { accountName: updatePasswordDto.accountName } }).then(data => data?.toJSON());
+
+        if(!user){
+            return res.status(400).json({
+                message: `No existe un usuario con el nombre ${updatePasswordDto.accountName} en la base de datos`
+            })
+        }
+        
+        const contraseñaValidad = await bcrypt.compare(updatePasswordDto.contraseña, user.contraseña);
+
+        if(!contraseñaValidad) {
+            return res.status(400).json({
+                message:'Password Incorrecto'
+            })
+        }
+
+        const responseDto = await userService.updatePassword(updatePasswordDto);
+        
+        return res.status(responseDto.code).json(responseDto);
+
+    }
+
     async getUserList( req: Request, res: Response): Promise<Response> { 
         const responseDto = await userService.getUserList();
         return res.status(responseDto.code).json(responseDto);
@@ -84,7 +140,7 @@ export class UsersController {
 
         const payload = req.body;
 
-        console.log(payload.accountName);
+        // console.log(payload.accountName);
 
         // const hashedPassword = await bcrypt.hash(contraseña, 10);
         // console.log(hashedPassword);
@@ -101,6 +157,8 @@ export class UsersController {
                     });
 
         }
+
+        createUserDto.accountName = utilidades.formateoDePalabras(createUserDto.accountName);
 
         //Validar si el usuario existe en la base de datos
         const user = await User.findOne( {where: { accountName: createUserDto.accountName }} );

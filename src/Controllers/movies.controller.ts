@@ -13,6 +13,7 @@ import generosService from "../services/generos.service";
 import utilidades from "../common/utilidades/utilidades";
 import { PeliculaGenero } from "../models/peliculas_generos";
 import { ValoracionComentario } from "../models/valoraciones_comentarios";
+import { Pelicula } from '../models/peliculas';
 
 export class MoviesController {
 
@@ -26,6 +27,55 @@ export class MoviesController {
         const movie = await moviesService.getOne(+id);
         return res.json(movie);
     }
+
+    async getPeliculasPorGenero ( req: Request, res: Response): Promise<Response> { 
+
+        let { nombre } = req.body;
+
+        if (nombre === undefined) {
+
+            const response = {
+                code: 400,
+                message: `Nombre vacio, es necesario que ingrese un nombre`
+            }
+
+            return res.status(response.code).json(response);
+        }
+
+        nombre = utilidades.formateoDePalabras(nombre);
+
+        if (!(await generosService.buscarGeneroPorNombre(nombre))) { 
+            
+            const response = { 
+                code: 400, 
+                message: 'Ya existe un genero con ese nombre' 
+            }
+    
+            return res.status(response.code).json(response);
+
+        }
+
+        const peliculas = await moviesService.getPeliculasPorGenero(nombre);
+
+        if (peliculas === null) {
+
+            const response = {
+                code: 500,
+                message: `No hay peliculas ingresadas`
+            }
+
+            return res.status(response.code).json(response);
+
+        }
+
+        const response = {
+            code: 200,
+            peliculas
+        }
+
+        return res.status(response.code).json(response);
+    }
+
 
     async create( req: Request, res: Response): Promise<Response> { 
 
@@ -116,6 +166,18 @@ export class MoviesController {
     }            
 
     async update( req: Request, res: Response): Promise<Response> { 
+        
+        if (decodeToken.rol !== 'admin') {
+            
+            const response: ResponseDto = {
+                code: 401,
+                message: 'No tiene permiso para agregar un genero'
+            }
+
+            return res.status(response.code).send(response);
+
+        }
+
         const { id } = req.params;
         const payload = req.body;
 
@@ -140,6 +202,18 @@ export class MoviesController {
     }
 
     async delete( req: Request, res: Response): Promise<Response> { 
+        
+        if (decodeToken.rol !== 'admin') {
+            
+            const response: ResponseDto = {
+                code: 401,
+                message: 'No tiene permiso para agregar un genero'
+            }
+
+            return res.status(response.code).send(response);
+
+        }
+
         const { id } = req.params;
 
         await moviesService.delete(+id)
@@ -153,7 +227,7 @@ export class MoviesController {
             
             const response: ResponseDto = {
                 code: 401,
-                message: 'No tiene permiso de crear una pelicula'
+                message: 'No tiene permiso de crear una valoracion'
             }
 
             return res.status(response.code).send(response);
@@ -172,6 +246,21 @@ export class MoviesController {
         }
 
         await ValoracionComentario.create({ ...valoracionValidada.data });
+
+        const valoraciones = await ValoracionComentario.findAll({ where: { peliculaId: valoracionValidada.data.peliculaId } });
+        
+        let totalValoraciones = valoraciones.length;
+        let sumaValoraciones = 0;
+
+        valoraciones.forEach((val) => {
+            
+            sumaValoraciones += val.dataValues.valoracion;
+            
+        });
+
+        const promValoraciones = (sumaValoraciones/totalValoraciones).toString();
+
+        await Pelicula.update({ valoraciones_promedio: promValoraciones.toString() }, { where: { id: valoracionValidada.data.peliculaId } });
         
         return res.status(valoracionValidada.code).json(
             valoracionValidada

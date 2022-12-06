@@ -38,7 +38,7 @@ export const Pelicula = conn.define<PeliculaModel, PeliculaAddModel>('peliculas'
         type: Sequelize.DataType.STRING(250)
     },
     valoraciones_promedio: {
-        type: Sequelize.DataType.INTEGER
+        type: Sequelize.DataType.STRING(250)
     },
     precio: {
         type: Sequelize.DataType.STRING(250)

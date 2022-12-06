@@ -3,8 +3,9 @@ import { Request, Response } from 'express';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { User } from '../models/usuarios';
 import { UpdateUserDto } from '../dtos/update-user.dto';
-import bcryp from 'bcrypt';
+import bcrypt from 'bcrypt';
 import rolService from './rol.service';
+import { UpdatePasswordDto } from '../dtos/update-password.dto';
 
 class UserService{
 
@@ -38,9 +39,9 @@ class UserService{
         
         this.responseDto = new ResponseDto();
         try {
-            this.responseDto.data = await User.findAll({});
             this.responseDto.code = 200;
             this.responseDto.message = 'Este es el listado de Usuario'
+            this.responseDto.data = await User.findAll({});
             return this.responseDto;
         } catch (error) {
             this.responseDto.code = 500;
@@ -56,13 +57,18 @@ class UserService{
         return user;
     }
 
+    public async getOneAccountName (accountName: string) {
+        const user = await User.findOne({ where : { accountName } });
+        return user;
+    }
+
     public async createUser ( createUserDto : CreateUserDto ) {
 
         this.responseDto = new ResponseDto();
 
         try {
             
-            createUserDto.contraseña = await bcryp.hash(createUserDto.contraseña, 10);
+            createUserDto.contraseña = await bcrypt.hash(createUserDto.contraseña, 10);
             
             this.responseDto.code = 201;
             this.responseDto.message = 'Usuario creado satisfactoriamente';
@@ -113,6 +119,19 @@ class UserService{
 
         return this.getOneUser(id)
 
+    }
+
+    public async updatePassword (updatePassword: UpdatePasswordDto) {
+
+        const nuevaContraseña = await bcrypt.hash(updatePassword.nuevaContraseña, 10);
+
+        const updateUser = await User.update({ contraseña: nuevaContraseña }, { where : { accountName: updatePassword.accountName }});
+
+        return {
+            code: 200,
+            user: await this.getOneAccountName(updatePassword.accountName)
+        };     
+        
     }
 
     public async deleteUser ( id : number ) {

@@ -1,6 +1,6 @@
 import express, { json }  from 'express';
 import { MoviesController } from './controllers/movies.controller';
-import {UsersController} from './controllers/user.controller';
+import { UsersController } from './controllers/user.controller';
 import {conn} from './database/connection';
 import { Comentario } from './models/comentarios';
 import { Genero } from './models/generos';
@@ -9,6 +9,7 @@ import { PeliculaGenero } from './models/peliculas_generos';
 import { Rol } from './models/roles';
 import { User } from './models/usuarios';
 import { ValoracionComentario } from './models/valoraciones_comentarios';
+import generosRoutes from './routers/generos.routes';
 import moviesRoutes from './routers/movies.routes';
 import router from './routers/movies.routes';
 import rolRoutes from './routers/rol.routes';
@@ -43,10 +44,12 @@ class App{
     routes(){
         this.express.use('/api', moviesRoutes.router);
         this.express.use('/api', userRoutes.router);
-        this.express.use('/api', rolRoutes.router)
+        this.express.use('/api', rolRoutes.router);
+        this.express.use('/api', generosRoutes.router);
 
         // this.express.use('api/user', router)
     }
+
     db(){
         conn
         .sync()
