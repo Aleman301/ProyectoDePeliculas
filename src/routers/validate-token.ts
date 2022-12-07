@@ -19,8 +19,7 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
         //Tiene token
         try {
             
-            const match = (headerToken.match(/(Bearer )?/) && headerToken.match(/(Bearer)?/)[1] !== undefined) ? true : false;
-            const bearerToken = (match) ? headerToken.slice(7) : headerToken;
+            const bearerToken = (headerToken.startsWith('Bearer')) ? headerToken.slice(7) : headerToken;
 
             const infoToken = jwt.verify(bearerToken, process.env.SECRET_KEY || 'Erlin99');
 

@@ -110,12 +110,12 @@ class PeliculasService{
         const movie = await this.getOne(id);
 
         if(!movie){
-            return null;
+            return { code: 400, message: 'La pelicula no existe.'  };
         }
 
         const deletedPelicula = await Pelicula.destroy({ where: {id} });
 
-        return true;
+        return { code: 200, message: 'Pelicula eliminada correctamente.' };
 
     }
    

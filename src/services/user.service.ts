@@ -11,29 +11,7 @@ class UserService{
 
     private responseDto: ResponseDto;
 
-    public async login(){
-        
-        this.responseDto = new ResponseDto();
-        try {
 
-            this.responseDto.data = await User.findAll({});
-            this.responseDto.code = 200;
-            this.responseDto.message = 'Usuario encontrado exitosamente';
-
-            return this.responseDto;
-
-        } catch (error) {
-
-            this.responseDto.code = 500;
-            this.responseDto.message = 'Usuario no registra';
-
-            console.log({error});
-
-            return this.responseDto;
-
-        }
-
-    }
 
     public async getUserList() {
         

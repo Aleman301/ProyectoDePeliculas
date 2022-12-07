@@ -181,8 +181,8 @@ export class MoviesController {
         const { id } = req.params;
         const payload = req.body;
 
-        let updateCategoryDto = plainToClass(UpdateMovieDto, payload)
-        const errors = await validate(updateCategoryDto);
+        let updatemoviesDto = plainToClass(UpdateMovieDto, payload)
+        const errors = await validate(updatemoviesDto);
 
         if(errors.length > 0) {
             console.log(errors);
@@ -193,9 +193,48 @@ export class MoviesController {
 
         }
 
+        let generosExistentes = [];
+
+        for (const genero of payload.generos) {
+
+            const nombreFormateado = utilidades.formateoDePalabras(genero);
+
+            const existeGenero = await generosService.buscarGeneroPorNombre(nombreFormateado);
+
+            if (!existeGenero) {
+
+                return  res.status(400).json({
+                            code: 400,
+                            message: `El genero '${genero}' no existe, solo existen los siguientes generos...`,
+                            generos_disponibles: await generosService.getGenerosList()
+                        });
+
+            }
+
+            generosExistentes.push(existeGenero);
+
+        }
+
         let category =  await moviesService.update(payload, +id);
 
-        console.log(category)
+        for (const genero of generosExistentes) {
+
+            if (await generosService.existeGenero(+id, genero.id)) {
+                
+                return  res.status(400).json({
+                    code: 400,
+                    message: `El genero '${genero.nombre}' ya existe en la pelicula...`,
+                    generos_disponibles: await generosService.getGenerosList()
+                });
+
+            }
+
+            await PeliculaGenero.create({
+                peliculaId: +id,
+                generoId: genero.id
+            });
+
+        }
 
         return res.json(category);
 
@@ -207,7 +246,7 @@ export class MoviesController {
             
             const response: ResponseDto = {
                 code: 401,
-                message: 'No tiene permiso para agregar un genero'
+                message: 'No tiene permiso para eliminar una pelicula'
             }
 
             return res.status(response.code).send(response);
@@ -216,9 +255,9 @@ export class MoviesController {
 
         const { id } = req.params;
 
-        await moviesService.delete(+id)
+        const deleteMovie = await moviesService.delete(+id)
 
-        return res.status(200).json();
+        return res.status(deleteMovie.code).json(deleteMovie);
     }      
     
     public async createValoracionComentario (req: Request, res: Response) {

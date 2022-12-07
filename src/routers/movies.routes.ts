@@ -15,8 +15,8 @@ class MoviesRoutes {
         this.router.get('/movies/generos', validateToken, moviesController.getPeliculasPorGenero);
         this.router.get('/movies/:id', moviesController.getOne);
         this.router.post('/movies', validateToken, moviesController.create);
-        this.router.patch('/movies/:id', moviesController.update);
-        this.router.delete('/movies/:id', moviesController.delete)
+        this.router.patch('/movies/:id', validateToken, moviesController.update);
+        this.router.delete('/movies/:id', validateToken, moviesController.delete)
 
         this.router.post('/movies/valoracion', validateToken, moviesController.createValoracionComentario);
 

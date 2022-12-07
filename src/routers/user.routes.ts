@@ -13,7 +13,7 @@ class UsersRoutes {
 
     initRoutes(){
         this.router.post('/user', usersController.createUser);
-        this.router.get('/user', validateToken, usersController.getUserList);
+        this.router.get('/user', validateToken,usersController.getUserList);
         this.router.get('/user/:id', validateToken, usersController.getOneUser);
         this.router.post('/userRegister', usersController.createUser);
         this.router.patch('/user/:id', validateToken, usersController.update);

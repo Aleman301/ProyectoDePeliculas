@@ -2,6 +2,7 @@ import { ResponseDto } from "../common/dto/response.dto";
 import utilidades from "../common/utilidades/utilidades";
 import { CreateGeneroDto } from "../dtos/create-genero.dto";
 import { Genero } from "../models/generos";
+import { PeliculaGenero } from "../models/peliculas_generos";
 
 class GenerosServices {
 
@@ -155,6 +156,14 @@ class GenerosServices {
             });
 
         }
+
+    }
+
+    public async existeGenero (peliculaId: number, generoId: number) {
+
+        const genero = await PeliculaGenero.findOne({ where: { peliculaId, generoId } });
+
+        return genero;
 
     }
 

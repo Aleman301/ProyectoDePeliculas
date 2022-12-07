@@ -12,6 +12,8 @@ import 'dotenv/config';
 import rolService from "../services/rol.service";
 import utilidades from "../common/utilidades/utilidades";
 import { UpdatePasswordDto } from "../dtos/update-password.dto";
+import { decodeToken } from "../routers/validate-token";
+import { ResponseDto } from "../common/dto/response.dto";
 /*
 export const newUser = async (req: Request, res: Response) => {
 
@@ -126,11 +128,35 @@ export class UsersController {
     }
 
     async getUserList( req: Request, res: Response): Promise<Response> { 
+
+        if (decodeToken.rol !== 'admin') {
+            
+            const response: ResponseDto = {
+                code: 401,
+                message: 'No tiene permiso para ver los usuarios'
+            }
+
+            return res.status(response.code).send(response);
+
+        }
+
         const responseDto = await userService.getUserList();
         return res.status(responseDto.code).json(responseDto);
     }
 
     async getOneUser( req: Request, res: Response ): Promise<Response> {
+
+        if (decodeToken.rol !== 'admin') {
+            
+            const response: ResponseDto = {
+                code: 401,
+                message: 'No tiene permiso para ver los usuarios'
+            }
+
+            return res.status(response.code).send(response);
+
+        }
+
         const { id } = req.params;
         const user = await userService.getOneUser(+id);
         return res.json(user);
